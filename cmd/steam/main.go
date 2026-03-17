@@ -87,7 +87,17 @@ func main() {
 			for _, status := range netSorted {
 				// 3. Map the ID to a readable name
 				heroName := mapper.GetName(status.Player.HeroID)
-				fmt.Printf("  %s (%s) \t|\t Lvl%d Net%d KDA=%d/%d/%d\n", status.Player.Name, heroName, status.ScoreboardPlayer.Level, status.ScoreboardPlayer.NetWorth, status.ScoreboardPlayer.Kills, status.ScoreboardPlayer.Deaths, status.ScoreboardPlayer.Assists)
+				fmt.Printf("  %s (%s) \t|\t Lvl%d Net%d LD=%d/%d KDA=%d/%d/%d\n",
+					status.Player.Name,
+					heroName,
+					status.ScoreboardPlayer.Level,
+					status.ScoreboardPlayer.NetWorth,
+					status.ScoreboardPlayer.LastHits,
+					status.ScoreboardPlayer.Denies,
+					status.ScoreboardPlayer.Kills,
+					status.ScoreboardPlayer.Deaths,
+					status.ScoreboardPlayer.Assists,
+				)
 			}
 
 		}
