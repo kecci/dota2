@@ -2,6 +2,7 @@ package opendota
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -50,11 +51,11 @@ type MatchDetail struct {
 	DireScore             int         `json:"dire_score"`
 	RadiantTeamID         int         `json:"radiant_team_id"`
 	RadiantName           string      `json:"radiant_name"`
-	RadiantLogo           int64       `json:"radiant_logo"`
+	RadiantLogo           float64     `json:"radiant_logo"`
 	RadiantTeamComplete   int         `json:"radiant_team_complete"`
 	DireTeamID            int         `json:"dire_team_id"`
 	DireName              string      `json:"dire_name"`
-	DireLogo              int64       `json:"dire_logo"`
+	DireLogo              float64     `json:"dire_logo"`
 	DireTeamComplete      int         `json:"dire_team_complete"`
 	RadiantCaptain        int         `json:"radiant_captain"`
 	DireCaptain           int         `json:"dire_captain"`
@@ -63,7 +64,7 @@ type MatchDetail struct {
 	League                League      `json:"league"`
 	RadiantTeam           RadiantTeam `json:"radiant_team"`
 	DireTeam              DireTeam    `json:"dire_team"`
-	Metadata              any         `json:"metadata"`
+	Metadata              string      `json:"metadata"`
 	ReplayURL             string      `json:"replay_url"`
 	Patch                 int         `json:"patch"`
 	Region                int         `json:"region"`
@@ -74,11 +75,11 @@ type PermanentBuffs struct {
 	GrantTime     int `json:"grant_time"`
 }
 type GoldPerMin struct {
-	Raw int     `json:"raw"`
+	Raw float64 `json:"raw"`
 	Pct float64 `json:"pct"`
 }
 type XpPerMin struct {
-	Raw int     `json:"raw"`
+	Raw float64 `json:"raw"`
 	Pct float64 `json:"pct"`
 }
 type KillsPerMin struct {
@@ -94,11 +95,11 @@ type HeroDamagePerMin struct {
 	Pct float64 `json:"pct"`
 }
 type HeroHealingPerMin struct {
-	Raw int     `json:"raw"`
+	Raw float64 `json:"raw"`
 	Pct float64 `json:"pct"`
 }
 type TowerDamage struct {
-	Raw int     `json:"raw"`
+	Raw float64 `json:"raw"`
 	Pct float64 `json:"pct"`
 }
 type Benchmarks struct {
@@ -118,6 +119,16 @@ type Players struct {
 	PartySize          int              `json:"party_size"`
 	TeamNumber         int              `json:"team_number"`
 	TeamSlot           int              `json:"team_slot"`
+	Team               int              `json:"team"`
+	CountryCode        string           `json:"country_code,omitempty"`
+	FantasyRole        int              `json:"fantasy_role,omitempty"`
+	TeamID             int              `json:"team_id,omitempty"`
+	TeamName           string           `json:"team_name,omitempty"`
+	TeamTag            string           `json:"team_tag,omitempty"`
+	IsLocked           bool             `json:"is_locked,omitempty"`
+	IsPro              bool             `json:"is_pro,omitempty"`
+	LockedUntil        string           `json:"locked_until,omitempty"`
+	Xp                 int              `json:"xp"`
 	HeroID             int              `json:"hero_id"`
 	HeroVariant        int              `json:"hero_variant"`
 	Item0              int              `json:"item_0"`
@@ -151,10 +162,10 @@ type Players struct {
 	GoldSpent          int              `json:"gold_spent"`
 	AbilityUpgradesArr []int            `json:"ability_upgrades_arr"`
 	Personaname        string           `json:"personaname"`
-	Name               any              `json:"name"`
+	Name               string           `json:"name"`
 	LastLogin          time.Time        `json:"last_login"`
 	RankTier           int              `json:"rank_tier"`
-	ComputedMmr        any              `json:"computed_mmr"`
+	ComputedMmr        string           `json:"computed_mmr"`
 	IsSubscriber       bool             `json:"is_subscriber"`
 	RadiantWin         bool             `json:"radiant_win"`
 	StartTime          int              `json:"start_time"`
@@ -171,10 +182,11 @@ type Players struct {
 	TotalGold          int              `json:"total_gold"`
 	TotalXp            int              `json:"total_xp"`
 	KillsPerMin        float64          `json:"kills_per_min"`
-	Kda                int              `json:"kda"`
+	Kda                float64          `json:"kda"`
 	Abandons           int              `json:"abandons"`
 	Benchmarks         Benchmarks       `json:"benchmarks"`
 }
+
 type PicksBans struct {
 	IsPick bool `json:"is_pick"`
 	HeroID int  `json:"hero_id"`
@@ -189,8 +201,8 @@ type OdData struct {
 }
 type League struct {
 	Leagueid int    `json:"leagueid"`
-	Ticket   any    `json:"ticket"`
-	Banner   any    `json:"banner"`
+	Ticket   string `json:"ticket"`
+	Banner   string `json:"banner"`
 	Tier     string `json:"tier"`
 	Name     string `json:"name"`
 }
@@ -204,26 +216,43 @@ type DireTeam struct {
 	TeamID  int    `json:"team_id"`
 	Name    string `json:"name"`
 	Tag     string `json:"tag"`
-	LogoURL any    `json:"logo_url"`
+	LogoURL string `json:"logo_url"`
 }
 
 type OpenDotaLiveMatch struct {
-	MatchID       string `json:"match_id"`
-	ServerSteamID string `json:"server_steam_id"`
-	LobbyID       string `json:"lobby_id"`
-	GameTime      int    `json:"game_time"`
-	AverageMmr    int    `json:"average_mmr"`
-	RadiantScore  int    `json:"radiant_score"`
-	DireScore     int    `json:"dire_score"`
-	Players       []struct {
-		AccountID int    `json:"account_id"`
-		HeroID    int    `json:"hero_id"`
-		Name      string `json:"name"`
-		Level     int    `json:"level"`
-		Gold      int    `json:"gold"`
-		NetWorth  int    `json:"net_worth"`
-		Xp        int    `json:"xp"`
-	} `json:"players"`
+	ActivateTime               int       `json:"activate_time"`
+	DeactivateTime             int       `json:"deactivate_time"`
+	ServerSteamID              string    `json:"server_steam_id"`
+	LobbyID                    string    `json:"lobby_id"`
+	LeagueID                   int       `json:"league_id"`
+	LobbyType                  int       `json:"lobby_type"`
+	GameTime                   int       `json:"game_time"`
+	Delay                      int       `json:"delay"`
+	Spectators                 int       `json:"spectators"`
+	GameMode                   int       `json:"game_mode"`
+	AverageMmr                 int       `json:"average_mmr"`
+	MatchID                    string    `json:"match_id"`
+	SeriesID                   int       `json:"series_id"`
+	TeamNameRadiant            string    `json:"team_name_radiant"`
+	TeamNameDire               string    `json:"team_name_dire"`
+	TeamLogoRadiant            string    `json:"team_logo_radiant"`
+	TeamLogoDire               string    `json:"team_logo_dire"`
+	TeamIDRadiant              int       `json:"team_id_radiant"`
+	TeamIDDire                 int       `json:"team_id_dire"`
+	SortScore                  int       `json:"sort_score"`
+	LastUpdateTime             int       `json:"last_update_time"`
+	RadiantLead                int       `json:"radiant_lead"`
+	RadiantScore               int       `json:"radiant_score"`
+	DireScore                  int       `json:"dire_score"`
+	Players                    []Players `json:"players"`
+	BuildingState              int       `json:"building_state"`
+	WeekendTourneyTournamentID int       `json:"weekend_tourney_tournament_id"`
+	WeekendTourneyDivision     int       `json:"weekend_tourney_division"`
+	WeekendTourneySkillLevel   int       `json:"weekend_tourney_skill_level"`
+	WeekendTourneyBracketRound int       `json:"weekend_tourney_bracket_round"`
+	CustomGameDifficulty       int       `json:"custom_game_difficulty"`
+	IsPlayerDraft              bool      `json:"is_player_draft"`
+	IsWatchEligible            bool      `json:"is_watch_eligible"`
 }
 
 func (c *Client) GetOpenDotaLive() ([]OpenDotaLiveMatch, error) {
@@ -238,24 +267,27 @@ func (c *Client) GetOpenDotaLive() ([]OpenDotaLiveMatch, error) {
 	return matches, err
 }
 
-// 8732939854
 func (c *Client) GetMatchDetail(matchID int64) (MatchDetail, error) {
 	md := MatchDetail{}
 	req, err := http.NewRequest("GET", "https://api.opendota.com/api/matches/"+strconv.Itoa(int(matchID)), nil)
 	if err != nil {
 		return md, err
 	}
-	req.Header.Set("Accept", "application/json; charset=utf-8")
-	req.Header.Set("Cookie", "session=e30=; session.sig=9A3MANd7pSadSYrfALkOJK-1IPc")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return md, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return md, fmt.Errorf("MatchID %d is %s %s", matchID, strconv.Itoa(resp.StatusCode), http.StatusText(resp.StatusCode))
+	}
 	bodyText, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return md, err
 	}
-	_ = json.Unmarshal(bodyText, &md)
+	errUnmarshal := json.Unmarshal(bodyText, &md)
+	if errUnmarshal != nil {
+		return md, errUnmarshal
+	}
 	return md, nil
 }
